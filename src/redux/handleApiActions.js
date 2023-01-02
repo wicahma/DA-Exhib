@@ -31,7 +31,7 @@ export const fetchAPI = (dataPath) => {
   return (dispatch) => {
     dispatch(getData());
     axios
-      .get(`${rootPath}/${dataPath}`)
+      .get(`${rootPath}${dataPath}`)
       .then((res) => {
         // console.log(res);
         dispatch(getDataSucceed(res.data));

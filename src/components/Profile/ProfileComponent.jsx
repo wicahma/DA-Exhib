@@ -4,9 +4,9 @@ import { connect } from "react-redux";
 class ProfileComponent extends React.Component {
   constructor(props) {
     super(props);
-    this.state = ({
-      user : this.props.dataUser[0]
-    })
+    this.state = {
+      user: this.props.dataUser,
+    };
   }
   render() {
     return (
@@ -14,60 +14,16 @@ class ProfileComponent extends React.Component {
         <h2 className="font-bold text-3xl">Profile</h2>
         <div className="mt-5">
           <form action="put" className="grid grid-cols-2 gap-2">
-            <div className="col-span-2">
-              <label htmlFor="nickname" className="text-sm font-bold">
-                Nickname<span className="text-red-700">*</span>
+            <div className="col-span-1">
+              <label htmlFor="username" className="text-sm font-bold">
+                Username<span className="text-red-700">*</span>
               </label>
               <input
-                id="nickname"
-                name="nickname"
+                id="username"
+                name="username"
                 type="text"
                 placeholder="Fill it with your name"
-                defaultValue={this.state.user.nickname}
-                className="col-span-2 rounded-xl w-full focus:border-orange-500 focus:ring-orange-500"
-              />
-            </div>
-            <div className="col-span-2">
-              <label htmlFor="fullname" className="text-sm font-bold">
-                Full Name<span className="text-red-700">*</span>
-              </label>
-              <input
-                id="fullname"
-                name="fullname"
-                type="text"
-                placeholder="Fill it with your name"
-                defaultValue={this.state.user.nama}
-                className="col-span-2 rounded-xl w-full focus:border-orange-500 focus:ring-orange-500"
-              />
-            </div>
-            <div className="col-span-1">
-              <label htmlFor="gender" className="text-sm font-bold">
-                Gender<span className="text-red-700">*</span>
-              </label>
-              <select
-                name="gender"
-                id="gender"
-                className="rounded-xl w-full focus:border-orange-500 focus:ring-orange-500"
-              >
-                <option value="none" disabled>
-                  None
-                </option>
-                <option value="laki-laki">
-                  Men{" "}
-                </option>
-                <option value="perempuan">Women </option>
-              </select>
-            </div>
-
-            <div className="col-span-1">
-              <label htmlFor="birth" className="text-sm font-bold">
-                Birth<span className="text-red-700">*</span>
-              </label>
-              <input
-                id="birth"
-                name="birth"
-                type="date"
-                defaultValue={this.state.user.birth}
+                defaultValue={this.state.user.username}
                 className="col-span-2 rounded-xl w-full focus:border-orange-500 focus:ring-orange-500"
               />
             </div>
@@ -84,22 +40,12 @@ class ProfileComponent extends React.Component {
                 className="col-span-2 rounded-xl w-full focus:border-orange-500 focus:ring-orange-500"
               />
             </div>
-            <div className="col-span-1 row-span-2">
-              <label htmlFor="bio" className="text-sm font-bold">
-                Bio
-              </label>
-              <textarea
-                id="bio"
-                name="bio"
-                type="text"
-                placeholder="Fill it with your name"
-                defaultValue={"Teguh Dwi Cahya Kusuma"}
-                className="col-span-2 rounded-xl w-full focus:border-orange-500 focus:ring-orange-500 caret-orange-500 min-h-[214px]"
-              />
+            <div className="col-span-2 text-xl font-bold mt-5">
+              <h3>Change password</h3>
             </div>
             <div className="col-span-1 space-y-1">
               <label htmlFor="oldpass" className="text-sm font-bold">
-                Renew Password
+                Old Password
               </label>
               <input
                 id="oldpass"
@@ -108,7 +54,12 @@ class ProfileComponent extends React.Component {
                 placeholder="Old Password"
                 className="col-span-2 rounded-xl w-full focus:border-orange-500 focus:ring-orange-500"
               />
+            </div>
 
+            <div className="col-span-1 space-y-1">
+              <label htmlFor="oldpass" className="text-sm font-bold">
+              New Password
+              </label>
               <input
                 id="newpass"
                 name="newpass"

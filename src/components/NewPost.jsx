@@ -5,7 +5,6 @@ import { useLocation } from "react-router-dom";
 
 const NewPost = (props) => {
   let location = useLocation()
-  console.log(location)
   return (
 
     <div className="fixed bottom-5 right-10 bg-orange-500 hover:bg-orange-600 transition-colors rounded-full z-50">

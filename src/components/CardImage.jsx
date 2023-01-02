@@ -5,24 +5,26 @@ import { HiChatBubbleOvalLeft } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 
 export const CardImage = (props) => {
+  const handleLike = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
 
-    const handleLike = (e) => {
-        e.stopPropagation()
-        e.preventDefault()
-    } 
-    const handleComment = (e) => {
-        e.stopPropagation()
-        e.preventDefault()
-    } 
-    const handlePlaySound = (e) => {
-        e.stopPropagation()
-        e.preventDefault()
-    } 
+  const handleComment = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+  
+  const handlePlaySound = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+  
   return (
     <div className="group relative cursor-pointer">
-      <Link to={`/explore/${props.dataG.id}`} state={{dataArt: props.dataG}}>
+      <Link to={`/explore/${props.dataG._id}`} state={{ dataArt: props.dataG }}>
         <img
-          src={`https://picsum.photos/800/${props.urlGambar}?random=${props.urlGambar}`}
+          src={props.urlGambar}
           alt={props.urlGambar}
           className="bg-cover object-cover object-center rounded-2xl"
         />
@@ -36,13 +38,22 @@ export const CardImage = (props) => {
               <p className="align-middle h-full w-full">123k Likes</p>
             </div>
             <div className="flex gap-1">
-              <div onClick={(e) => handleLike(e)} className="p-1 rounded-lg bg-red-500 hover:bg-red-700 hover:scale-110 transition-all active:scale-75">
+              <div
+                onClick={(e) => handleLike(e)}
+                className="p-1 rounded-lg bg-red-500 hover:bg-red-700 hover:scale-110 transition-all active:scale-75"
+              >
                 <AiFillHeart className="text-red-200" />
               </div>
-              <div onClick={(e) => handleComment(e)} className="p-1 rounded-lg bg-slate-500 hover:bg-slate-700 hover:scale-110 transition-all active:scale-75">
+              <div
+                onClick={(e) => handleComment(e)}
+                className="p-1 rounded-lg bg-slate-500 hover:bg-slate-700 hover:scale-110 transition-all active:scale-75"
+              >
                 <HiChatBubbleOvalLeft className="text-slate-200" />
               </div>
-              <div onClick={(e) => handlePlaySound(e)} className="p-1 rounded-lg bg-orange-500 hover:bg-orange-700 hover:scale-110 transition-all active:scale-75">
+              <div
+                onClick={(e) => handlePlaySound(e)}
+                className="p-1 rounded-lg bg-orange-500 hover:bg-orange-700 hover:scale-110 transition-all active:scale-75"
+              >
                 <IoPlay className="text-slate-200" />
               </div>
             </div>

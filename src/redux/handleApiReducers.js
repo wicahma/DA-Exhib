@@ -5,13 +5,10 @@ export const initialState = {
   hasErrors: false,
   dataAPI: [],
   dataUser: {
-    id: null,
-    nama: null,
-    avatar: null,
-    password: null,
+    _id: null,
+    username: null,
     email: null,
-    tanggal_regist: null,
-    tanggal_update: null,
+    token: null,
   },
   validate: false,
 };
@@ -35,13 +32,10 @@ export default function handleApiReducers(state = initialState, action) {
       return {
         ...state,
         dataUser: {
-          id: null,
-          nama: null,
-          avatar: null,
-          password: null,
+          _id: null,
+          username: null,
           email: null,
-          tanggal_regist: null,
-          tanggal_update: null,
+          token: null,
         },
         validate: false,
         loading: false,

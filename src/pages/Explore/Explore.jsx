@@ -18,17 +18,13 @@ class Explore extends React.Component {
 
   getAPI = (stateName, url) => {
     this.props.dispatch(fetchAPI(url));
-    this.setState(
-      {
-        [stateName]: this.props.dataAPI,
-      }
-      // () => console.log(this.state.image)
-    );
+    this.setState({
+      [stateName]: this.props.dataAPI,
+    });
   };
 
   componentDidMount() {
-    console.log("mengambil data API");
-    this.getAPI("image", "art")
+    this.getAPI("image", "arts/all");
   }
 
   renderPost = (listImg = []) => {
@@ -37,10 +33,10 @@ class Explore extends React.Component {
     return listImg.map((data) => (
       <CardImage
         dataG={data}
-        key={data.id}
-        urlGambar={data.urlGambar}
-        namaArt={data.namaArt}
-        deskripsi={data.deskripsi}
+        key={data._id}
+        urlGambar={data.imageUrl}
+        namaArt={data.name}
+        deskripsi={data.desc}
       />
     ));
   };
