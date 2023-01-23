@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useRef, useState } from "react";
 import Carousel from "react-multi-carousel";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import Comment from "./Comment";
 import "react-multi-carousel/lib/styles.css";
 import "./component.css";
@@ -26,70 +26,73 @@ const responsive = {
 };
 
 // @ Get Comments
-const useKomentar = (dataArt, comment) => {
+const useKomentar = (dataArt, token, comment) => {
   let [komentarByArt, setKomentarByArt] = useState([]);
+  console.log("get comment goes brr..");
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_POINT}komentar?idArt=${dataArt.id}`)
+      .get(`${process.env.REACT_APP_API_POINT}comments/${dataArt._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => {
-        console.log(res);
         setKomentarByArt(res.data);
       })
       .catch((err) => console.log(err));
-  }, [comment]);
+  }, [token, comment]);
   return komentarByArt;
 };
 
 // @ Get Art By User
-const useUser = (dataArt) => {
+const useArtByUser = (dataArt) => {
   let [dataArtPengguna, setArtPengguna] = useState();
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_API_POINT}arts/user/${dataArt.creatorID}`)
       .then((res) => {
         setArtPengguna(res.data);
-        console.log(res);
+        // console.log(res);
       })
       .catch((err) => console.log(err));
-  }, [dataArt.idPengguna]);
+  }, [dataArt.creatorID]);
   return dataArtPengguna;
 };
 
-// @ Get Likes By Art
-const useLikes = (dataArt) => {
+// @ Get Likes By Arts
+const useLikes = (dataArt, token) => {
   let [dataLikes, setLikes] = useState([]);
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_POINT}arts/${dataArt.namaPengguna}`)
+      .get(`${process.env.REACT_APP_API_POINT}likes/${dataArt.namaPengguna}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => {
         setLikes(res.data);
+        console.log(res);
       })
       .catch((err) => console.log(err));
-  }, [dataArt.idPengguna]);
+  }, [token]);
   return dataLikes;
 };
 
-
-
 const CIDetail = (props) => {
   let [showComment, setComment] = useState(false);
+  let [commentRefresh, setCommentRefresh] = useState(false);
   let [myComment, setMyComment] = useState();
   let [render, setRender] = useState();
   const location = useLocation();
   const dataArt = location.state.dataArt;
 
-  const user = useUser(dataArt);
+  const userArt = useArtByUser(dataArt);
   const [creator, setCreator] = useState();
   // const likes = useLikes(dataArt);
-  const komentar = useKomentar(dataArt, showComment);
+  const komentar = useKomentar(dataArt, props.user.token, commentRefresh);
 
   const carouselRef = useRef();
   const oneImage = useRef();
 
   useEffect(() => {
-    if (user === undefined) return user;
-    let selected = user.findIndex((data) => data._id === dataArt._id);
-    console.log(carouselRef);
+    if (userArt === undefined) return userArt;
+    let selected = userArt.findIndex((data) => data._id === dataArt._id);
     setTimeout(() => {
       if (selected >= 0) {
         carouselRef.current.goToSlide(selected + 2, true);
@@ -103,25 +106,28 @@ const CIDetail = (props) => {
       .catch(() => {
         setCreator(null);
       });
-  }, [user]);
+  }, [userArt]);
 
   const handleSendComment = (comment) => {
-    console.log("sudah dikirim");
+    // console.log("sudah dikirim");
     console.log(comment.target.id);
     // console.log(oneImage.current.id);
     axios
-      .post("${process.env.REACT_APP_API_POINT}/komentar", {
-        idPengguna: "123",
-        idArt: parseInt(comment.target.id),
-        komentar: myComment,
-        namaPengguna: "Teguh Dwi Cahya Kusuma",
-        uploadAt: "22-10-2022",
-      })
+      .post(
+        `${process.env.REACT_APP_API_POINT}comments/${comment.target.id}`,
+        {
+          comment: myComment,
+        },
+        {
+          headers: { Authorization: `Bearer ${props.user.token}` },
+        }
+      )
       .then((res) => {
         console.log(res);
         setMyComment("");
-        setComment(false);
-        setComment(true);
+        commentRefresh !== false
+          ? setCommentRefresh(false)
+          : setCommentRefresh(true);
       })
       .catch((err) => {
         console.log(err);
@@ -136,11 +142,24 @@ const CIDetail = (props) => {
     e.preventDefault();
   };
   const handleComment = (e) => {
-    // comments.current.classList[0] === ''
     !showComment ? setComment(true) : setComment(false);
     console.log(props.validate);
-    // e.stopPropagation();
-    // e.preventDefault();
+  };
+
+  const handleDeleteComment = (artID, commentID) => {
+    axios
+      .delete(
+        `${process.env.REACT_APP_API_POINT}comments/${artID}/${commentID}`,
+        {
+          headers: { Authorization: `Bearer ${props.user.token}` },
+        }
+      )
+      .then((res) => {
+        commentRefresh !== false
+          ? setCommentRefresh(false)
+          : setCommentRefresh(true);
+      })
+      .catch((err) => console.log(err));
   };
 
   return (
@@ -170,34 +189,34 @@ const CIDetail = (props) => {
           // autoPlay={false}
           // autoPlaySpeed={1000}
           keyBoardControl={true}
-          transitionDuration={100}
+          transitionDuration={500}
           containerClass="h-full"
           deviceType={props.deviceType}
           dotListClass="nahh"
           itemClass="w-full h-full"
           sliderClass="h-full"
         >
-          {user === undefined ? (
+          {userArt === undefined ? (
             <div>Loading</div>
           ) : (
-            user.map((user) => {
+            userArt.map((images) => {
               return (
                 <div
-                  key={user._id}
+                  key={images._id}
                   ref={oneImage}
                   className="grid md:grid-cols-2 grid-cols-1 gap-4 h-full"
                 >
                   <div className="gambar w-full overflow-y-auto col-span-1  bg-opacity-10 rounded-2xl">
                     <img
-                      src={user.imageUrl}
-                      alt={user.imageUrl}
+                      src={images.imageUrl}
+                      alt={images.imageUrl}
                       className="bg-cover object-cover object-center rounded-2xl my-auto"
                     />
                   </div>
-                  <div className="col-span-1 space-y-5 overflow-y-auto  h-full">
+                  <div className="col-span-1 gambar-side space-y-5 overflow-y-auto  h-full">
                     <div className="deskripsi ">
-                      <h2 className="font-bold text-2xl">{user.name}</h2>
-                      <p>{user.desc}</p>
+                      <h2 className="font-bold text-2xl">{images.name}</h2>
+                      <p>{images.desc}</p>
                     </div>
                     <div>
                       <audio className="w-full h-10" controls>
@@ -256,7 +275,7 @@ const CIDetail = (props) => {
                           />
                           <button
                             type="button"
-                            id={user.id}
+                            id={images._id}
                             onClick={(e) => handleSendComment(e)}
                             className="bg-orange-500 absolute right-0 bottom-0 rounded-full w-min mt py-1 px-4"
                           >
@@ -265,16 +284,20 @@ const CIDetail = (props) => {
                         </form>
                       </div>
                       <div className="">
-                        {/* {komentar
-                            .filter((komentar) => komentar.idArt === user.id)
-                            .map((data) => {
-                              return (
-                                <Comment
-                                  namaUser={data.namaPengguna}
-                                  komentar={data.komentar}
-                                />
-                              );
-                            })} */}
+                        {komentar !== undefined &&
+                          komentar.map((data) => {
+                            return (
+                              <Comment
+                                key={data._id}
+                                namaUser={data.userID.username}
+                                idUser={data.userID._id}
+                                komentar={data.comment}
+                                handleDelete={() =>
+                                  handleDeleteComment(images._id, data._id)
+                                }
+                              />
+                            );
+                          })}
                       </div>
                     </div>
                   </div>
@@ -290,6 +313,7 @@ const CIDetail = (props) => {
 
 const mapStateToProps = (state) => ({
   validate: state.handleAPI.validate,
+  user: state.handleAPI.dataUser,
 });
 
 export default connect(mapStateToProps)(CIDetail);

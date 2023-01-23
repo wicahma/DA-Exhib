@@ -1,19 +1,19 @@
-.gambar::-webkit-scrollbar {
+.gambar::-webkit-scrollbar,.gambar-side::-webkit-scrollbar {
   width: 0.5em;
   background: transparent;
   height: 0.5em;
 }
 
-.gambar::-webkit-scrollbar-track {
+.gambar::-webkit-scrollbar-track,.gambar-side::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
-.gambar::-webkit-scrollbar-thumb {
+.gambar::-webkit-scrollbar-thumb,.gambar-side::-webkit-scrollbar-thumb  {
   background-color: #fb7f33;
   border-radius: 20px;
   transition-duration: 500ms;
 }
 
-.gambar::-webkit-scrollbar-thumb:hover {
+.gambar::-webkit-scrollbar-thumb:hover,.gambar-side::-webkit-scrollbar-thumb:hover {
   background-color: #fc6507;
 }

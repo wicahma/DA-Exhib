@@ -3,16 +3,24 @@ import React, { Fragment } from "react";
 import { useRef } from "react";
 import { BsFileEarmarkImage } from "react-icons/bs";
 import { MdOutlineDeleteForever } from "react-icons/md";
+import { connect } from "react-redux";
+import { Navigate } from "react-router-dom";
 
-export default class Upload extends React.Component {
+class Upload extends React.Component {
   constructor(props) {
     super(props);
-
     this.imgFile = React.createRef();
     this.state = {
+      upload: {
+        name: "",
+        desc: "",
+      },
       files: [],
       file: null,
       url: "",
+      error: "",
+      uploadStatus: false,
+      uploadMsg: "",
     };
   }
 
@@ -22,12 +30,6 @@ export default class Upload extends React.Component {
     document.querySelector("#art-preview").src = blobURL;
     document.querySelector("#nama-file").innerText = file.name;
     document.querySelector("#input-image").classList.remove("opacity-50");
-    console.group("Handler Gambar");
-    console.log(data);
-    console.log(data.target.files);
-    console.log(data.target);
-    console.groupEnd();
-
     const img = {
       preview: URL.createObjectURL(this.imgFile.current.files[0]),
       data: this.imgFile.current.files[0],
@@ -35,26 +37,55 @@ export default class Upload extends React.Component {
     this.setState(
       {
         file: img,
+        error: "",
       },
       console.log(this.state.file)
     );
   };
 
-  handleSubmit = async () => {
+  handleSubmit = async (token) => {
+    if (this.state.upload.name === "")
+      return this.setState({ error: "Isi kolom nama" });
+    if (this.state.upload.desc === "")
+      return this.setState({ error: "Isi kolom deskripsi" });
+    if (this.state.file === null)
+      return this.setState({ error: "Tambahkan Karya Seni terlebih dahulu!" });
     let formData = new FormData();
     formData.append("file", this.state.file.data);
-    var config = {
-      onUploadProgress: function (progressEvent) {
-        var percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        console.log(percentCompleted);
-      },
-    };
+    // var config = {
+    //   onUploadProgress: function (progressEvent) {
+    //     var percentCompleted = Math.round(
+    //       (progressEvent.loaded * 100) / progressEvent.total
+    //     );
+    //     console.log(percentCompleted);
+    //   },
+    // };
     axios
-      .post("http://localhost:4000/upload-file", formData, config)
+      .post(`${process.env.REACT_APP_API_POINT}arts/upload-file`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => {
-        res ? console.log(res) : console.log("data gagal ditambahkan");
+        axios
+          .post(
+            `${process.env.REACT_APP_API_POINT}arts`,
+            {
+              name: this.state.upload.name,
+              desc: this.state.upload.desc,
+              imageUrl: `https://drive.google.com/uc?export=view&id=${res.data.idArt}`,
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          )
+          .then(() => this.setState({ uploadStatus: true }))
+          .catch((err) =>
+            this.setState({
+              uploadMsg: "Art gagal diupload, coba dalam beberapa saat lagi",
+            })
+          );
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 
@@ -65,21 +96,29 @@ export default class Upload extends React.Component {
     document.querySelector("#nama-file").innerText =
       "Tidak ada file yang dipilih.";
     document.querySelector("#input-image").classList.add("opacity-50");
+    this.setState({
+      file: null,
+    });
+  };
 
-    console.group("Deleted Data");
-    console.log(data.value);
-    console.log(data.files);
-    console.groupEnd();
+  handleOnChange = (e) => {
+    const id = e.target.id;
+    const value = e.target.value;
+    this.setState({
+      upload: { ...this.state.upload, [id]: value },
+      error: "",
+    });
   };
 
   render() {
     return (
       <Fragment>
+        {this.state.uploadStatus ? <Navigate to="/explore" replace /> : null}
         <h3 className="mx-auto text-3xl font-bold">Upload</h3>
         <form action="put" className="grid grid-cols-4 gap-4">
           <div
             id="input-image"
-            className="col-span-3 border-2 hover:border-orange-500 opacity-50 hover:opacity-100 transition-all border-dashed rounded-2xl flex flex-col items-center relative"
+            className="col-span-4 border-2 hover:border-orange-500 opacity-50 hover:opacity-100 transition-all border-dashed rounded-2xl flex flex-col items-center relative"
           >
             <input
               type="file"
@@ -105,7 +144,7 @@ export default class Upload extends React.Component {
                 </span>{" "}
                 allowed
               </p>
-              <p>20Mb Max File Size.</p>
+              <p>5Mb Max File Size.</p>
             </div>
             <label
               htmlFor="input-image"
@@ -124,31 +163,16 @@ export default class Upload extends React.Component {
 
           <input
             type="text"
+            id="name"
+            onChange={(e) => this.handleOnChange(e)}
             placeholder="Art Name"
             className="col-span-4 rounded-xl w-full focus:border-orange-500 focus:ring-orange-500"
           />
 
-          <select
-            name="art-type"
-            id="art-type-input"
-            className="col-span-2 rounded-xl w-full focus:border-orange-500 focus:ring-orange-500"
-          >
-            <option value="none" disabled selected>
-              None
-            </option>
-            <option value="Nature">Nature</option>
-            <option value="Abstract">Abstract</option>
-          </select>
-
-          <input
-            type="date"
-            placeholder="date"
-            className="col-span-2 rounded-xl w-full focus:border-orange-500 focus:ring-orange-500"
-          />
-
           <textarea
-            id="art-description"
+            id="desc"
             name="art-description"
+            onChange={(e) => this.handleOnChange(e)}
             type="text"
             placeholder="Art Description"
             className="col-span-2 rounded-xl w-full focus:border-orange-500 focus:ring-orange-500 caret-orange-500 min-h-[214px]"
@@ -162,6 +186,20 @@ export default class Upload extends React.Component {
               controls
             ></img>
           </div>
+          {this.state.error === "" ? null : (
+            <div className="col-span-4 text-sm text-white">
+              <p className="bg-red-600 w-max px-3 rounded-md">
+                {this.state.error}
+              </p>
+            </div>
+          )}
+          {this.state.uploadMsg === "" ? null : (
+            <div className="col-span-4 text-sm text-white">
+              <p className="bg-red-600 w-max px-3 rounded-md">
+                {this.state.uploadMsg}
+              </p>
+            </div>
+          )}
           <label className="col-span-3 gap-2 flex flex-row items-center">
             <input
               type="checkbox"
@@ -179,7 +217,7 @@ export default class Upload extends React.Component {
           <div className="col-span-1 text-end">
             <button
               type="button"
-              onClick={() => this.handleSubmit()}
+              onClick={() => this.handleSubmit(this.props.user.token)}
               className="px-3 py-1 text-white bg-orange-500 hover:bg-orange-600 transition-colors rounded-full"
             >
               Upload Artwork
@@ -190,3 +228,9 @@ export default class Upload extends React.Component {
     );
   }
 }
+
+const mapstateToProps = (state) => ({
+  user: state.handleAPI.dataUser,
+});
+
+export default connect(mapstateToProps)(Upload);

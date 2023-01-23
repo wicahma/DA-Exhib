@@ -1,20 +1,55 @@
+import axios from "axios";
 import React from "react";
+import { connect } from "react-redux";
 
-const dummyImage = [1,9,2,7,5,4,2,8,3,6]
+class ArtworkComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      artwork: null,
+    };
+  }
 
-export default class ArtworkComponent extends React.Component {
+  getArtworks = (token) => {
+    axios
+      .get(`${process.env.REACT_APP_API_POINT}arts`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => this.setState({ artwork: res.data }))
+      .catch((err) => console.log(err));
+  };
+  componentDidMount() {
+    this.getArtworks(this.props.user.token);
+  }
+
   render() {
     return (
       <div className="w-full">
         <h2 className="font-bold text-3xl mb-5">My Artworks</h2>
         <div className="columns-4 gap-4 space-y-4">
-            {dummyImage.map((artwork, index) => {
+          {this.state.artwork === null ? (
+            <div>Loading...</div>
+          ) : (
+            this.state.artwork.map((artwork, index) => {
               return (
-                <div key={artwork} className="">
-                  <img src={`https://picsum.photos/800/1${artwork}00?random=${artwork}`} className="rounded-xl" alt={index} />
-                </div>)})}
+                <div key={artwork._id} className="">
+                  <img
+                    src={artwork.imageUrl}
+                    className="rounded-xl"
+                    alt={index}
+                  />
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     );
   }
 }
+
+const mapStateToProps = (state) => ({
+  user: state.handleAPI.dataUser,
+});
+
+export default connect(mapStateToProps)(ArtworkComponent);
